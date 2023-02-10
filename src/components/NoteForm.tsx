@@ -8,15 +8,20 @@ import { Link } from 'react-router-dom';
 import { FormEvent, useRef, useState } from 'react';
 import { Tag } from '../App';
 import { NoteData } from '../App';
+import { v4 as uuidV4 } from 'uuid';
 
 type NoteFormPropsType = {
-	onSubmit: (data: NoteData) => void
+	onSubmit: (data: NoteData) => void,
+	onAddTag: (data: Tag) => void,
+	tags: Tag[]
 }
 
-function NoteForm({onSubmit}: NoteFormPropsType) {
+function NoteForm({onSubmit, onAddTag, tags}: NoteFormPropsType) {
 	const inputTitleRef = useRef<HTMLInputElement>(null);
 	const markdownRef = useRef<HTMLTextAreaElement>(null);
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+
+	console.log({tags});
 
 	function handleSubmit(e: FormEvent) {
 		e.preventDefault();
@@ -27,7 +32,8 @@ function NoteForm({onSubmit}: NoteFormPropsType) {
 		});
 	}
 
-	console.log(selectedTags)
+	console.log({selectedTags});
+
 	return (
 		<Form onSubmit={handleSubmit}>
 			<Stack gap={4}>
@@ -41,7 +47,15 @@ function NoteForm({onSubmit}: NoteFormPropsType) {
 					<Col>
 						<Form.Group controlId='tags'>
 							<Form.Label>Tags</Form.Label>
-							<CreatableReactSelect isMulti
+							<CreatableReactSelect 
+								isMulti
+								onCreateOption={label => {
+									const newTag = {id: uuidV4(), label: label};
+									onAddTag(newTag);
+									setSelectedTags(prevSelectedTags => {
+										return [...prevSelectedTags, newTag];
+									});
+								}}
 								onChange={tags => {
 									setSelectedTags(
 										tags.map(tag => ({id: tag.value, label: tag.label}))
@@ -50,6 +64,7 @@ function NoteForm({onSubmit}: NoteFormPropsType) {
 								value={selectedTags.map(tag => {
 									return { label: tag.label, value: tag.id }
 								})}
+								options={tags.map(tag => ({ label: tag.label, value: tag.id }))}
 							/>
 						</Form.Group>
 					</Col>
