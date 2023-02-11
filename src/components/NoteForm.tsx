@@ -4,22 +4,23 @@ import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import CreatableReactSelect from 'react-select/creatable';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FormEvent, useRef, useState } from 'react';
 import { Tag } from '../App';
 import { NoteData } from '../App';
 import { v4 as uuidV4 } from 'uuid';
 
-type NoteFormPropsType = {
+type NoteFormProps = {
 	onSubmit: (data: NoteData) => void,
 	onAddTag: (data: Tag) => void,
 	tags: Tag[]
 }
 
-function NoteForm({onSubmit, onAddTag, tags}: NoteFormPropsType) {
+function NoteForm({onSubmit, onAddTag, tags}: NoteFormProps) {
 	const inputTitleRef = useRef<HTMLInputElement>(null);
 	const markdownRef = useRef<HTMLTextAreaElement>(null);
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+	const navigate = useNavigate();
 
 	console.log({tags});
 
@@ -30,6 +31,7 @@ function NoteForm({onSubmit, onAddTag, tags}: NoteFormPropsType) {
 			markdown: markdownRef.current!.value,
 			tags: [...selectedTags],
 		});
+		navigate("..");
 	}
 
 	console.log({selectedTags});
@@ -56,6 +58,7 @@ function NoteForm({onSubmit, onAddTag, tags}: NoteFormPropsType) {
 										return [...prevSelectedTags, newTag];
 									});
 								}}
+								options={tags.map(tag => ({ label: tag.label, value: tag.id }))}
 								onChange={tags => {
 									setSelectedTags(
 										tags.map(tag => ({id: tag.value, label: tag.label}))
@@ -64,7 +67,6 @@ function NoteForm({onSubmit, onAddTag, tags}: NoteFormPropsType) {
 								value={selectedTags.map(tag => {
 									return { label: tag.label, value: tag.id }
 								})}
-								options={tags.map(tag => ({ label: tag.label, value: tag.id }))}
 							/>
 						</Form.Group>
 					</Col>
