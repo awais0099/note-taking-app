@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
-import { Button, Card, Col, Row, Stack } from 'react-bootstrap'
+import { useState } from 'react'
+import { Button, Card, Col, Modal, Row, Stack } from 'react-bootstrap'
 import Form from 'react-bootstrap/Form';
 import { Link } from 'react-router-dom';
 import CreatableReactSelect from 'react-select/creatable';
-import { Note, Tag } from '../App';
-import style from './NoteList.module.css';
-import Badge from 'react-bootstrap/esm/Badge';
+import { Tag } from '../App';
+import NoteCard from './NoteCard';
+import EditTagsModal from './EditTagsModal';
 
 type simplifiedNote = {
     id: string,
@@ -16,9 +16,13 @@ type simplifiedNote = {
 type NoteListProps = {
     availableTags: Tag[],
     notes: simplifiedNote[],
+    onDeleteTag: (id: string) => void,
+    onUpdateTag: (id: string, label: string) => void,
+    onAddTag: (data: Tag) => void,
+    modalData: {show: boolean, handleClose: (show: false|true) => void, handleShow: (show: false|true) => void}
 }
 
-function NoteList({ availableTags, notes }: NoteListProps) {
+function NoteList({ availableTags, notes, onDeleteTag, onUpdateTag, onAddTag, modalData }: NoteListProps) {
     const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
     const [title, setTitle] = useState<string>('');
 
@@ -31,9 +35,6 @@ function NoteList({ availableTags, notes }: NoteListProps) {
         )
     });
 
-
-    console.log({filteredNotes});
-
     return (
         <>
             <Row className='align-items-center mb-4'>
@@ -43,7 +44,7 @@ function NoteList({ availableTags, notes }: NoteListProps) {
                         <Link to="/new">
                             <Button type="button" variant='primary'>Create</Button>
                         </Link>
-                        <Button type="button" variant='outline-secondary'>Edit Tags</Button>
+                        <Button type="button" variant='outline-secondary' onClick={() => modalData.handleShow(true)}>Edit Tags</Button>
                     </Stack>
                 </Col>
             </Row>
@@ -81,27 +82,16 @@ function NoteList({ availableTags, notes }: NoteListProps) {
                     </Col>
                 ))}
             </Row>
+           
+            <EditTagsModal
+                tags={availableTags}
+                onDeleteTag={onDeleteTag}
+                onUpdateTag={onUpdateTag}
+                onAddTag={onAddTag}
+                modalData={modalData}
+            />
         </>
     )
-}
-
-function NoteCard({id, title, tags}: simplifiedNote) {
-    return (
-        <Card as={Link} to={`/${id}`} className={`h-100 text-reset text-decoration-none ${style.card}`}>
-            <Card.Body>
-                <Stack gap={1} className='align-items-center justify-content-center'>
-                    <span className='fs-5'>{title}</span>
-                    <Stack gap={1} direction='horizontal' className='justify-content-center align-items-center flex-wrap'>
-                        {tags.map(tag => (
-                            <Badge key={tag.id} className='text-truncate'>
-                                {tag.label}
-                            </Badge>
-                        ))}
-                    </Stack>
-                </Stack>
-            </Card.Body>
-        </Card>
-    );
 }
 
 export default NoteList
